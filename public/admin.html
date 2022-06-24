@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista admin</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <h1>Bienvenido Admin</h1>
+    <hr>
+    <h3>Agregar nuevo producto:</h3>
+    <form id="myForm">
+        <label for="name">Nombre del producto:</label>
+        <input type="text" name="name" id="name" value=""><br>
+        <label for="thumbnail">Categoria:</label>
+        <input type="text" name="code" id="code" value=""><br>
+        <label for="thumbnail">Descripción:</label>
+        <input type="text" name="description" id="description" value=""><br>
+        <label for="price">Precio del producto:</label>
+        <input type="number" name="price" id="price" value=""><br>
+        <input type="submit">
+    </form>
+    <hr>
+    <h3>Productos actuales:</h3><a id="cargar" onclick="cargarProductos()">Cargar</a>
+    <div id="products" class="product-list"></div>
+    
+    <script>
+        function cargarProductos() {
+            const products = document.getElementById('products')
+            products.innerHTML = ``
+            fetch('/api/products')
+            .then(r => r.json())
+            .then(data => {
+                //console.log(data)
+                data.forEach(el => {
+                    products.innerHTML += `
+                    <div class="product-card">
+                        <p>Producto: ${el.name}</p>
+                        <p>Categoria: <b>${el.code}</b></p>
+                        <p>Descripcion: <em>${el.description}</em></p>
+                        <p>Precio: $${el.price}</p>
+                    </div>`
+                });
+            })
+            .catch(e => console.log(e))
+        }
+
+            const form = document.getElementById('myForm')
+            form.addEventListener('submit', e => {
+                e.preventDefault()
+
+                const object = {}
+                new FormData(form).forEach((value, key) => object[key] = value);
+
+                console.log(object)
+                const data = new FormData(form)
+                fetch('/api/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'admin': 'true'},
+                    body: JSON.stringify(object)
+                })
+                    .then(raw => raw.json())
+                    .then(data => console.log(data))
+                    .catch(error => console.log(error))
+                cargarProductos()
+            })
+    </script>
+</body>
+</html>

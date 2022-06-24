@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista user</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <h1>Bienvenido Usuario</h1>
+    <hr>
+    <h3>Listado de productos:</h3>
+    <div id="products" class="product-list"></div>
+
+    <script>
+        fetch('/api/products')
+            .then(r => r.json())
+            .then(data => {
+                //console.log(data)
+                const products = document.getElementById('products')
+                data.forEach(el => {
+                    products.innerHTML += `<div class="product-card">
+                                                <p>Producto: ${el.name}</p>
+                                                <p>Categoria: <b>${el.code}</b></p>
+                                                <p>Descripcion: <em>${el.description}</em></p>
+                                                <p>Precio: $${el.price}</p>
+                                                <button data-id="${el.id}" class="add">Agregar</button>
+                                            </div>`
+                });
+                loadEvent(data)
+            })
+            .catch(e => console.log(e))
+
+        function loadEvent(array) {
+            const agregarCarrito = document.getElementsByClassName('add')
+            for (const btn of agregarCarrito) {
+                btn.onclick = (e) => {
+                    //console.log(e.target.getAttribute('data-id'))
+                    const prodID = e.target.getAttribute('data-id')
+                    //console.log(prodID)
+                    const producto = array.find(el => el.id == prodID)
+                    //console.log(producto)
+                    const carrito = 1  //modifica la ID del carrito al cual va a hacer el POST. Actualmente tiene '1' ya que cargue uno solo en el carrito.json
+
+                    fetch(`/api/cart/${carrito}/products`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(producto)
+                    })
+                        .then(raw => raw.json())
+                        .then(data => console.log(data))
+                        .catch(error => console.log(error))
+                }
+            }
+        }
+    </script>
+</body>
+</html>
